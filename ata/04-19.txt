@@ -1,0 +1,79 @@
+Essa eh a ata da primeira reuniao de compiladores
+Presentes: Marcos Wendell Santos, David e Lucas Fernandes Turci
+
+Decisoes:
+1. <palavra_reservada,palavra_reservada> ou <palavra_reservada,simb_palavra_reservada> ???
+
+	Usar par <palavra_reservada, simbolo> como token para analise sintatica
+
+2. Qual estrutura usar para checagem de palavras reservadas?
+
+	Tokens:
+
+	Simbolos
+	:
+	;
+	.
+	:=
+	=
+	(
+	)
+	<>
+	<=
+	>=
+	<
+	>
+	*
+	/
+	+
+	-
+	,
+
+	Palavra reservada:
+	program
+	begin
+	end
+	const
+	var
+	real
+	integer
+	procedure
+	else
+	read
+	write
+	while
+	do
+	if
+	then
+	for
+	to
+
+	Vamos usar uma hash com a seguinte funcao:
+	int hash(string & s) {
+	    int ans = 0;
+	    for(char c : s) {
+	        ans = (ans * 151)%M;
+	        ans = (ans + c - '(' + 1)%M;
+	    }
+	    return ans;
+	}
+	em que M seria o tamanho da nossa estrutura hash
+
+3. como lidar com erros?
+	Vamos fazer genérico e se der tempo faz mais específico
+
+Pseudocodigo do nosso programa
+
+for linha do programa
+	s = lex para a linha
+	ret = checa_se_linha_eh_palavra_reservada(s)
+	se ret = true
+		retorna <linha, ~simbolo pra palavra reservada~>
+	senao se linha eh identificador
+		retorna <linha, identificador>
+	senao se linha eh numero inteiro
+		retorna <linha, numero_int>
+	senao se linha eh numero real
+		retorna <linha, numero_real>
+	senao
+		trata erros
