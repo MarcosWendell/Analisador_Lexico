@@ -1,6 +1,6 @@
 %{
 #include <stdio.h>
-}%
+%}
 
 digito [0-9]
 letra [a-zA-Z]
