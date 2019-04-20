@@ -6,7 +6,15 @@ massa
 11
 -1.1
 0.0
-{ dasdasdasfsfsaf?D:SAD:S;}
+{ dasdasdasfsfsaf?D:SAD:S;}}
+{
+}
 dddddddddddddddaaaaaaaa }}}
 f@
 999h
+program lalg;
+{entrada}
+var a: integer;
+{teste} begin {teste}
+readd(a,@,1);
+end.
