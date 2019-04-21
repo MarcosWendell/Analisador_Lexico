@@ -1,5 +1,10 @@
 %{
 #include <stdio.h>
+#include "hash.cpp"
+
+#define WORDFILE "words.txt"
+
+table t;
 %}
 
 digito [0-9]
@@ -19,52 +24,65 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 %%
 {numero_inteiro} { fprintf(yyout,"%s - Numero_Inteiro\n",yytext); }
 {numero_real} { fprintf(yyout,"%s - Numero_Real\n",yytext); }
-{ident} {	/*if(NOT_IN_HASH)*/
+{ident} {
+					string str = inHash(string(yytext),t);
+					if(str.size() == 0)
 						fprintf(yyout,"%s - Identificador\n",yytext);
-					/*else
-						fprintf(yyout,"%s - %s\n",yytext,LABEL_IN_HASH_FOR_FOUND_WORLD_OR_CHARACTER);*/
+					else
+						fprintf(yyout,"%s - %s\n",yytext,str.c_str());
 				}
 {comentario}
 {quebra_de_linha}
 {espaco}
-{caracter_invalido} { /*if(NOT_IN_HASH)*/
+{caracter_invalido} {
+											string str = inHash(string(yytext),t);
+											if(str.size() == 0)
 												fprintf(yyout,"Erro: Caracter Invalido - %s\n",yytext);
-											/*else
-												fprintf(yyout,"%s - %s\n",yytext,LABEL_IN_HASH_FOR_FOUND_WORLD_OR_CHARACTER);*/
+											else
+												fprintf(yyout,"%s - %s\n",yytext,str.c_str());
 										}
-{ident_mal_formado} { /*if(yytext[yyleng-1] NOT_IN_HASH)*/
+{ident_mal_formado} {
+											string str = inHash(string(&yytext[yyleng-1]),t);
+	 										if(str.size() == 0)
 												fprintf(yyout,"Erro: Identificador Mal Formado - %s\n",yytext);
-											/*else{
+											else{
 												char aux = yytext[yyleng-1];
 												yytext[yyleng-1] = '\0';
-												if(yytext NOT_IN_HASH)
+												string word = inHash(string(yytext),t);
+												if(word.size() == 0)
 													fprintf(yyout,"%s - Identificador\n",yytext);
 												else
-													fprintf(yyout,"%s - %s\n",yytext,LABEL_IN_HASH_FOR_FOUND_WORLD_OR_CHARACTER);
-												fprintf(yyout,"%c - %s\n",aux,LABEL_IN_HASH_FOR_FOUND_WORLD_OR_CHARACTER);
-											}*/
+													fprintf(yyout,"%s - %s\n",yytext,word.c_str());
+												fprintf(yyout,"%c - %s\n",aux,str.c_str());
+											}
 										}
 {comentario_mal_formatado} { fprintf(yyout,"Erro: Comentario Mal Formatado - %s\n",yytext); }
-{numero_inteiro_mal_formado} {/*if(yytext[yyleng-1] NOT_IN_HASH)*/
+{numero_inteiro_mal_formado} {
+															string str = inHash(string(&yytext[yyleng-1]),t);
+															if(str.size() == 0)
 																fprintf(yyout,"Erro: Numero Mal Formado - %s\n",yytext);
-															/*else{
+															else{
 																char aux = yytext[yyleng-1];
 																yytext[yyleng-1] = '\0';
 																fprintf(yyout,"%s - Numero_Inteiro\n",yytext);
-																fprintf(yyout,"%c - %s\n",aux,LABEL_IN_HASH_FOR_FOUND_WORLD_OR_CHARACTER);
-															}*/
+																fprintf(yyout,"%c - %s\n",aux,str.c_str());
+															}
 										 				 }
-{numero_real_mal_formado} {/*if(yytext[yyleng-1] NOT_IN_HASH)*/
+{numero_real_mal_formado} {
+													 string str = inHash(string(&yytext[yyleng-1]),t);
+													 if(str.size() == 0)
 														 fprintf(yyout,"Erro: Numero Mal Formado - %s\n",yytext);
-													 /*else{
+													 else{
 														 char aux = yytext[yyleng-1];
 														 yytext[yyleng-1] = '\0';
 														 fprintf(yyout,"%s - Numero_Real\n",yytext);
-														 fprintf(yyout,"%c - %s\n",aux,LABEL_IN_HASH_FOR_FOUND_WORLD_OR_CHARACTER);
-													 }*/
+														 fprintf(yyout,"%c - %s\n",aux,str.c_str());
+													 }
 												 	}
 %%
 int main(){
+	initHash(&t);
+	fillTable(&t,string(WORDFILE));
 	yylex();
 	return 0;
 }
