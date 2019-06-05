@@ -1,6 +1,6 @@
 : Simbolo_Dois_Pontos
 ; Simbolo_Ponto_E_Virgula
-. Simbolo_Ponto
+. Simbolo_Ponto_Final
 = Simbolo_Igual
 ( Simbolo_Abre_Parenteses
 ) Simbolo_Fecha_Parenteses

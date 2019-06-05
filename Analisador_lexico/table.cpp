@@ -4,19 +4,22 @@
 using namespace std;
 #define M 98
 
+//tupla palavra resevada e simbolo da palavra reservada
 typedef struct{
   string word, label;
-} node;
+} tupla;
 
-typedef vector<node> table;
+typedef vector<tupla> table;
 
-void initHash(table *t){
-  node aux;
+//inicializacao da tabela
+void initTable(table *t){
+  tupla aux;
   aux.word = string();
   aux.label = string();
   *t = table(M,aux);
 }
 
+//funcao hash para alocacao na tabela
 int hashFunction(string & s) {
     int ans = 0;
     for(char c : s) {
@@ -26,11 +29,12 @@ int hashFunction(string & s) {
     return ans;
 }
 
+//funcao que preenche a tabela a partir de um arquivo
 void fillTable(table *t, string filename){
   FILE* file = fopen(filename.c_str(),"r+");
   do{
     char* aux;
-    node n;
+    tupla n;
     fscanf(file,"%ms",&aux);
     n.word = string(aux);
     free(aux);
@@ -42,7 +46,8 @@ void fillTable(table *t, string filename){
   fclose(file);
 }
 
-string inHash(string s,table t){
+//funcao que verifica se a string procurada estah na tabela
+string inTable(string s,table t){
   int pos = hashFunction(s);
   if(t[pos].word == s)
     return t[pos].label;
