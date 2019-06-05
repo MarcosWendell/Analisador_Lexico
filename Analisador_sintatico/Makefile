@@ -6,6 +6,6 @@ yacc:
 lex:
 	lex trab2.l
 run:
-	./trab2.out <1.in
+	./trab2.out <teste1
 clean:
 	rm trab2.out
