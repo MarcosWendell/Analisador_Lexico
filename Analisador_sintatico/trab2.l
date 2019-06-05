@@ -3,15 +3,16 @@
 #include <stdlib.h>
 #include <string>
 #include "table.cpp"
+#include "y.tab.h"
 
 //arquivo com as palavras reservadas e simbolos especiais
-#define WORDFILE "words.txt"
+#define WORDFILE "codes.txt"
 
 //possiveis valores de retorno do analisador lexico
 enum{
 	FIM_DO_ARQUIVO,
-	NUMERO_INTEIRO,
-	NUMERO_REAL,
+	/* NUMERO_INTEIRO, */
+	/* NUMERO_REAL, */
 	IDENTIFICADOR,
 	PALAVRA_RESERVADA,
 	CARACTER_ESPECIAL,
@@ -21,6 +22,7 @@ enum{
 	COMENTARIO_MAL_FORMATADO
 };
 
+int line = 1;
 //variaveis globais para retorno de informacoes dos padroes encontrados
 char *tolken;//na variavel tolken e retornado o tolken
 string label;//na variavel label e retornado o simbolo definifo para cada caracter especial e palavra reservada, identificados por meio do uso da tabela
@@ -43,8 +45,8 @@ letra [a-zA-Z]
 palavra {letra}+
 /* padroes a serem identificados */
 ident {letra}({letra}|{digito})*
-numero_inteiro [+-]?{digito}+
-numero_real [+-]?{digito}+"."{digito}+
+numero_inteiro {digito}+
+numero_real {digito}+"."{digito}+
 comentario "{"[^\n\}]*"}"
 quebra_de_linha \n
 espaco " "
@@ -56,54 +58,64 @@ numero_inteiro_mal_formado {numero_inteiro}({caracter_invalido}|{letra})
 numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 %%
 {numero_inteiro} { 	//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-										if(yyout != stdout)
-											fprintf(yyout,"%s - Numero_Inteiro\n",yytext);
-										tolken = copyString(yytext,yyleng);
+										/* if(yyout != stdout) */
+											/* fprintf(yyout,"%s - Numero_Inteiro\n",yytext); */
+										/* tolken = copyString(yytext,yyleng); */
+										yylval.inteiro = atoi(yytext);
+										/* printf("%s\n",yytext); */
 										return NUMERO_INTEIRO;
 									}
 {numero_real} { //se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-								if(yyout != stdout)
-									fprintf(yyout,"%s - Numero_Real\n",yytext);
-								tolken = copyString(yytext,yyleng);
+								/* if(yyout != stdout) */
+									/* fprintf(yyout,"%s - Numero_Real\n",yytext); */
+								/* tolken = copyString(yytext,yyleng); */
+								yylval.real = atof(yytext);
+								/* printf("%s\n",yytext); */
 								return NUMERO_REAL;
 							}
 {ident} {
 					//verificando se eh uma palavra reservada ou um identificador
 					string str = inTable(string(yytext),t);
-					tolken = copyString(yytext,yyleng);
+					/* tolken = copyString(yytext,yyleng); */
+					yylval.str = copyString(yytext,yyleng);
 					//se nao estiver na tabela eh um identificador
 					if(str.size() == 0){
 						//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-						if(yyout != stdout)
-							fprintf(yyout,"%s - Identificador\n",yytext);
-						return IDENTIFICADOR;
+						/* if(yyout != stdout) */
+							/* fprintf(yyout,"%s - Identificador\n",yytext); */
+							/* printf("%s\n",yytext); */
+						return IDENT;
 					}else{
 						//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-						if(yyout != stdout)
-							fprintf(yyout,"%s - %s\n",yytext,str.c_str());
-						label = str;
-						return PALAVRA_RESERVADA;
+						/* if(yyout != stdout) */
+							/* fprintf(yyout,"%s - %s\n",yytext,str.c_str()); */
+						/* label = str; */
+						/* printf("%s\n",str.c_str()); */
+						return atoi(str.c_str());
 					}
 				}
 {comentario}	//cosumindo comentarios
-{quebra_de_linha}	//cosumindo quebras de linha
+{quebra_de_linha}	{line++;
+	/* printf("%s\n",yytext);*/}//cosumindo quebras de linha */
 {espaco}	//consumindo espacos em branco
 {caracter_invalido} {
 											//verificando se eh um simbolo especial ou caracter invalido
 											string str = inTable(string(yytext),t);
-											tolken = copyString(yytext,yyleng);
+											/* tolken = copyString(yytext,yyleng); */
 											//se o caracter nao estiver na tabela eh um caracter invalido
 											if(str.size() == 0){
 												//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-												if(yyout != stdout)
-													fprintf(yyout,"%s - Erro: Caracter Invalido\n",yytext);
-												return CARACTER_INVALIDO;
+												/* if(yyout != stdout) */
+													/* fprintf(yyout,"%s - Erro: Caracter Invalido\n",yytext); */
+													/* printf("%s\n",yytext); */
+												return yytext[0];
 											}else{
 												//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-												if(yyout != stdout)
-													fprintf(yyout,"%s - %s\n",yytext,str.c_str());
-												label = str;
-												return CARACTER_ESPECIAL;
+												/* if(yyout != stdout) */
+													/* fprintf(yyout,"%s - %s\n",yytext,str.c_str()); */
+												/* label = str; */
+												/* printf("%s\n",yytext); */
+												return str.c_str()[0];
 											}
 										}
 {ident_mal_formado} {
@@ -111,55 +123,63 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 											string str = inTable(string(&yytext[yyleng-1]),t);
 											//se o ultimo caracter do padrao encontrado nao estiver na tabela eh um identificador mal formado
 	 										if(str.size() == 0){
-												tolken = copyString(yytext,yyleng);
+												/* tolken = copyString(yytext,yyleng); */
 												//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-												if(yyout != stdout)
-													fprintf(yyout,"%s - Erro: Identificador Mal Formado\n",yytext);
-												return IDENTIFICADOR_MAL_FORMADO;
+												/* if(yyout != stdout) */
+													/* fprintf(yyout,"%s - Erro: Identificador Mal Formado\n",yytext); */
+													/* printf("%s\n",yytext); */
+												return IDENT;
 											}else{
 												char aux = yytext[yyleng-1];
 												//retornando caracter especial para proxima verificacao
 												yyless(yyleng-1);
 												string word = inTable(string(yytext),t);
 												//verificando se eh identificador ou palavra reservada
-												tolken = copyString(yytext,yyleng);
+												/* tolken = copyString(yytext,yyleng); */
 												//se nao estiver na tabela eh um identificador
 												if(word.size() == 0){
 													//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-													if(yyout != stdout)
-														fprintf(yyout,"%s - Identificador\n",yytext);
-													return IDENTIFICADOR;
+													/* if(yyout != stdout) */
+														/* fprintf(yyout,"%s - Identificador\n",yytext); */
+													yylval.str = copyString(yytext,yyleng);
+													/* printf("%s\n",yytext); */
+													return IDENT;
 												}else{
 													//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-													if(yyout != stdout)
-														fprintf(yyout,"%s - %s\n",yytext,word.c_str());
-													label = word;
-													return PALAVRA_RESERVADA;
+													/* if(yyout != stdout) */
+														/* fprintf(yyout,"%s - %s\n",yytext,word.c_str()); */
+													/* label = word; */
+													/* printf("%s %s\n",yytext,str.c_str()); */
+													return atoi(word.c_str());
 												}
 											}
 										}
 {comentario_mal_formatado} { //se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-														 if(yyout != stdout)
-														   fprintf(yyout,"%s - Erro: Comentario Mal Formatado\n",yytext);
-														 tolken = copyString(yytext,yyleng);
-														 return COMENTARIO_MAL_FORMATADO;
+														 /* if(yyout != stdout) */
+														   /* fprintf(yyout,"%s - Erro: Comentario Mal Formatado\n",yytext); */
+														 /* tolken = copyString(yytext,yyleng); */
+														 /* printf("%s\n",yytext); */
+														 return COMMENT;
 														}
 {numero_inteiro_mal_formado} {
 															//verificando se eh numero mal formado ou numero seguido de caracter especial
 															string str = inTable(string(&yytext[yyleng-1]),t);
 															if(str.size() == 0){
 																//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-																if(yyout != stdout)
-																	fprintf(yyout,"%s - Erro: Numero Mal Formado\n",yytext);
-																tolken = copyString(yytext,yyleng);
-																return NUMERO_MAL_FORMADO;
+																/* if(yyout != stdout) */
+																	/* fprintf(yyout,"%s - Erro: Numero Mal Formado\n",yytext); */
+																/* tolken = copyString(yytext,yyleng); */
+																/* printf("%s\n",yytext); */
+																return NUMERO_INTEIRO;
 															}else{
 																//retornando caracter especial para proxima verificacao
 																yyless(yyleng-1);
 																//se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-																if(yyout != stdout)
-																	fprintf(yyout,"%s - Numero_Inteiro\n",yytext);
-																tolken = copyString(yytext,yyleng);
+																/* if(yyout != stdout) */
+																	/* fprintf(yyout,"%s - Numero_Inteiro\n",yytext); */
+																/* tolken = copyString(yytext,yyleng); */
+																yylval.inteiro = atoi(str.c_str());
+																/* printf("%s\n",yytext); */
 																return NUMERO_INTEIRO;
 															}
 										 				 }
@@ -168,22 +188,25 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 													 string str = inTable(string(&yytext[yyleng-1]),t);
 													 if(str.size() == 0){
 														 //se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-														 if(yyout != stdout)
-															 fprintf(yyout,"%s - Erro: Numero Mal Formado\n",yytext);
-														 tolken = copyString(yytext,yyleng);
-														 return NUMERO_MAL_FORMADO;
+														 /* if(yyout != stdout) */
+															 /* fprintf(yyout,"%s - Erro: Numero Mal Formado\n",yytext); */
+														 /* tolken = copyString(yytext,yyleng); */
+														 /* printf("%s\n",yytext); */
+														 return NUMERO_REAL;
 													 }else{
 														 //retornando caracter especial para proxima verificacao
 														 yyless(yyleng-1);
 														 //se houver arquivo de texto para escrever eh feita a escrtia tambem no arquivo
-														 if(yyout != stdout)
-															 fprintf(yyout,"%s - Numero_Real\n",yytext);
-														 tolken = copyString(yytext,yyleng);
+														 /* if(yyout != stdout) */
+															 /* fprintf(yyout,"%s - Numero_Real\n",yytext); */
+														 /* tolken = copyString(yytext,yyleng); */
+														 yylval.real = atof(yytext);
+														 /* printf("%s\n",yytext); */
 														 return NUMERO_REAL;
 													 }
 												 	}
 %%
-int main(int argc, char *argv[]){
+/* int main(int argc, char *argv[]){
 	//iniciando tabela
 	initTable(&t);
 	//preenchendo tabela
@@ -241,5 +264,20 @@ int main(int argc, char *argv[]){
 	//se foi passado um arquivo por linha de comando, ele deve ser fechado
 	if(argc == 2)
 		fclose(yyout);
-	return 0;
+	BEGIN_ 0;
+} */
+int main(){
+	#ifdef YYDEBUG
+	yydebug = 0;
+	#endif
+
+	//iniciando tabela
+	initTable(&t);
+	//preenchendo tabela
+	fillTable(&t,string(WORDFILE));
+	yyparse();
+}
+
+int yywrap(){
+  return 1;
 }
