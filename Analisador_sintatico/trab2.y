@@ -6,6 +6,8 @@ void yyerror(const char*);
 int yylex(void);
 %}
 
+%define parse.error verbose
+
 %union {int inteiro;
         double real;
         char * str;
@@ -20,82 +22,82 @@ int yylex(void);
 
 %%
 program: PROGRAM IDENT ';' corpo '.'
-        | PROGRAM IDENT ';' error '.' {yyerror("Erro sintatico - erro no corpo do programa.");}
+        | PROGRAM IDENT ';' error '.' 
         ;
 corpo: dc BEGIN_ comandos END
-      | error BEGIN_ comandos END {yyerror("Erro sintatico - erro na declaracao de variaveis.");}
-      | dc BEGIN_ error END {yyerror("Erro sintatico - erro nos comandos do programa.");}
+      | error BEGIN_ comandos END
+      | dc BEGIN_ error END
       ;
 dc: dc_c dc_v dc_p
-    /* | error dc_v dc_p {yyerror("");}
-    | dc_c error dc_p {yyerror("");}
-    | dc_c dc_v error {yyerror("");} */
+    /* | error dc_v dc_p
+    | dc_c error dc_p
+    | dc_c dc_v error  */
     ;
 dc_c: CONST IDENT '=' numero';'dc_c
-    | CONST IDENT '=' error';'dc_c {yyerror("");}
-    /* | CONST IDENT '=' numero';'error {yyerror("");} */
+    | CONST IDENT '=' error';'dc_c
+    /* | CONST IDENT '=' numero';'error  */
     | %empty
     ;
 dc_v: VAR variaveis ':' tipo_var ';' dc_v
-    | VAR error ':' tipo_var ';' dc_v {yyerror("");}
-    | VAR variaveis ':' error ';' dc_v {yyerror("");}
-    /* | VAR variaveis ':' tipo_var ';' error {yyerror("");} */
+    | VAR error ':' tipo_var ';' dc_v
+    | VAR variaveis ':' error ';' dc_v
+    /* | VAR variaveis ':' tipo_var ';' error  */
     | %empty
     ;
 tipo_var: REAL
         | INTEGER
         ;
 variaveis: IDENT mais_var
-        /* | IDENT error {yyerror("");} */
+        /* | IDENT error  */
         ;
 mais_var: ','variaveis
-        /* | ','error {yyerror("");} */
+        /* | ','error  */
         | %empty
         ;
 dc_p: PROCEDURE IDENT parametros';'corpo_p dc_p
-    | PROCEDURE IDENT error';'corpo_p dc_p {yyerror("");}
-    /* | PROCEDURE IDENT parametros';'error dc_p {yyerror("");} */
-    /* | PROCEDURE IDENT parametros';'corpo_p error {yyerror("");} */
+    | PROCEDURE IDENT error';'corpo_p dc_p
+    /* | PROCEDURE IDENT parametros';'error dc_p  */
+    /* | PROCEDURE IDENT parametros';'corpo_p error  */
     | %empty
     ;
 parametros: '('lista_par')'
-          | '('error')' {yyerror("");}
+          | '('error')'
           | %empty
           ;
 lista_par: variaveis ':' tipo_var mais_par
-          | error ':' tipo_var mais_par {yyerror("");}
-          /* | variaveis ':' error mais_par {yyerror("");} */
-          /* | variaveis ':' tipo_var error {yyerror("");} */
+          | error ':' tipo_var mais_par
+          /* | variaveis ':' error mais_par  */
+          /* | variaveis ':' tipo_var error  */
           ;
 mais_par: ';'lista_par
-        /* | ';'error {yyerror("");} */
+        /* | ';'error  */
         | %empty
         ;
 corpo_p: dc_loc BEGIN_ comandos END';'
-        | error BEGIN_ comandos END';' {yyerror("");}
-        | dc_loc BEGIN_ error END';' {yyerror("");}
+        | error BEGIN_ comandos END';'
+        | dc_loc BEGIN_ error END';'
         ;
 dc_loc: dc_v
-        /* | error {yyerror("");} */
+        /* | error  */
         ;
 lista_arg: '('argumentos')'
-          | '('error')' {yyerror("");}
+          | '('error')'
           | %empty
           ;
 argumentos: IDENT mais_ident
-          /* | IDENT error {yyerror("");} */
+          /* | IDENT error  */
           ;
 mais_ident: ';'argumentos
-          /* | ';'error {yyerror("");} */
+          /* | ';'error  */
           | %empty
           ;
 pfalsa: ELSE cmd
-      /* | ELSE error {yyerror("");} */
+      /* | ELSE error  */
       | %empty %prec LOWER_THAN_ELSE
       ;
 comandos: cmd ';' comandos
-        | error ';' comandos {yyerror("");}
-        /* | cmd ';' error {yyerror("");} */
+        | error ';' comandos
+        /* | cmd ';' error  */
         | %empty
         ;
 cmd: READ'('variaveis')'
@@ -106,21 +108,21 @@ cmd: READ'('variaveis')'
     | IDENT ':''=' expressao
     | IDENT lista_arg
     | BEGIN_ comandos END
-    | WRITE'('error')' {yyerror("");}
-    | WHILE'('error')' DO cmd {yyerror("");}
-    /* | WHILE'('condicao')' DO error {yyerror("");} */
-    /* | FOR IDENT ':''=' NUMERO_INTEIRO TO NUMERO_INTEIRO DO error {yyerror("");} */
-    | IF error THEN cmd pfalsa {yyerror("");}
-    /* | IF condicao THEN error pfalsa {yyerror("");} */
-    /* | IF condicao THEN cmd error {yyerror("");} */
-    /* | IDENT ':''=' error {yyerror("");} */
-    /* | IDENT error {yyerror("");} */
-    | BEGIN_ error END {yyerror("");}
+    | WRITE'('error')'
+    | WHILE'('error')' DO cmd
+    /* | WHILE'('condicao')' DO error  */
+    /* | FOR IDENT ':''=' NUMERO_INTEIRO TO NUMERO_INTEIRO DO error  */
+    | IF error THEN cmd pfalsa
+    /* | IF condicao THEN error pfalsa  */
+    /* | IF condicao THEN cmd error  */
+    /* | IDENT ':''=' error  */
+    /* | IDENT error  */
+    | BEGIN_ error END
     ;
 condicao: expressao relacao expressao
-        /* | error relacao expressao {yyerror("");} */
-        /* | expressao error expressao {yyerror("");} */
-        /* | expressao relacao error {yyerror("");} */
+        /* | error relacao expressao  */
+        /* | expressao error expressao  */
+        /* | expressao relacao error  */
         ;
 relacao: '=''='
         | '<''>'
@@ -130,31 +132,31 @@ relacao: '=''='
         | '<'
         ;
 expressao: termo outros_termos
-        /* | error outros_termos {yyerror("");} */
-        /* | termo error {yyerror("");} */
+        /* | error outros_termos  */
+        /* | termo error  */
         ;
 op_un: '+'
       | '-'
       | %empty
       ;
 outros_termos: op_ad termo outros_termos
-              /* | error termo outros_termos {yyerror("");} */
-              /* | op_ad error outros_termos {yyerror("");} */
-              /* | op_ad termo error {yyerror("");} */
+              /* | error termo outros_termos  */
+              /* | op_ad error outros_termos  */
+              /* | op_ad termo error  */
               | %empty
               ;
 op_ad: '+'
       | '-'
       ;
 termo: op_un fator mais_fatores
-      /* | error fator mais_fatores {yyerror("");} */
-      /* | op_un error mais_fatores {yyerror("");} */
-      /* | op_un fator error {yyerror("");} */
+      /* | error fator mais_fatores  */
+      /* | op_un error mais_fatores  */
+      /* | op_un fator error  */
       ;
 mais_fatores: op_mul fator mais_fatores
-            /* | error fator mais_fatores {yyerror("");} */
-            /* | op_mul error mais_fatores {yyerror("");} */
-            /* | op_mul fator error {yyerror("");} */
+            /* | error fator mais_fatores  */
+            /* | op_mul error mais_fatores  */
+            /* | op_mul fator error  */
             | %empty
             ;
 op_mul: '*'
@@ -163,8 +165,8 @@ op_mul: '*'
 fator: IDENT
       | numero
       | '('expressao')'
-      | '('error')' {yyerror("");}
-      /* | error {yyerror("");} */
+      | '('error')'
+      /* | error  */
       ;
 numero: NUMERO_INTEIRO
       | NUMERO_REAL
@@ -172,5 +174,5 @@ numero: NUMERO_INTEIRO
 %%
 extern int line;
 void yyerror(const char *str){
-  fprintf(stderr,"Erro na linha %d: %s\n",line,str);
+  fprintf(stderr,"Error in line %d: %s\n",line,str);
 }

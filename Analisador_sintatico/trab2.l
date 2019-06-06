@@ -65,7 +65,7 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 {caracter_invalido} {
 											string str = inTable(string(yytext),t);
 											if(str.size() == 0){
-												yyerror("Erro lexico - caracter invalido.");
+												yyerror((string("lexical error, invalid carater '")+string(yytext)+"'").c_str());
 												return str.c_str()[0];
 											}else{
 												return str.c_str()[0];
@@ -74,7 +74,7 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 {ident_mal_formado} {
 											string str = inTable(string(&yytext[yyleng-1]),t);
 	 										if(str.size() == 0){
-												yyerror("Erro lexico - identificador mal formado.");
+												yyerror(string("lexical error, ill formed indetifier '"+string(yytext)+"'").c_str());
 												return IDENT;
 											}else{
 												char aux = yytext[yyleng-1];
@@ -89,13 +89,13 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 											}
 										}
 {comentario_mal_formatado} {
-															yyerror("Erro lexico - comentario mal formatado.");
+															yyerror(string("lexical error, ill formed comment '"+string(yytext)+"'").c_str());
 														 /* return COMENTARIO_MAL_FORMATADO; */
 														}
 {numero_inteiro_mal_formado} {
 															string str = inTable(string(&yytext[yyleng-1]),t);
 															if(str.size() == 0){
-																yyerror("Erro lexico - numero mal formado.");
+																yyerror(string("lexical error, ill formed number '"+string(yytext)+"'").c_str());
 																return NUMERO_INTEIRO;
 															}else{
 																yyless(yyleng-1);
@@ -106,7 +106,7 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 {numero_real_mal_formado} {
 													 string str = inTable(string(&yytext[yyleng-1]),t);
 													 if(str.size() == 0){
-														 yyerror("Erro lexico - numero mal formado.");
+														 yyerror(string("lexical error, ill formed number '"+string(yytext)+"'").c_str());
 														 /* return NUMERO_MAL_FORMADO; */
 													 }else{
 														 yyless(yyleng-1);

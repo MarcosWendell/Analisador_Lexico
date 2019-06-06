@@ -9,3 +9,4 @@ run:
 	./trab2.out <teste1
 clean:
 	rm trab2.out
+	clear
