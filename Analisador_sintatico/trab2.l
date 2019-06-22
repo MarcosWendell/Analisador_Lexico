@@ -91,7 +91,6 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 										}
 {comentario_mal_formatado} {
 															yyerror(string("lexical error, ill formed comment '"+string(yytext)+"'").c_str());
-														 /* return COMENTARIO_MAL_FORMATADO; */
 														}
 {numero_inteiro_mal_formado} {
 															string str = inTable(string(&yytext[yyleng-1]),t);

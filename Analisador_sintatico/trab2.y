@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 
 void yyerror(const char*);
 int yylex(void);
@@ -181,6 +182,14 @@ numero: NUMERO_INTEIRO
 %%
 extern int line;
 void yyerror(const char *str){
+  std::string aux = std::string(str);
+  int index = aux.find("$end");
+  printf("%d\n",index);
+  if(index != std::string::npos)
+    aux.replace(index,4,"EOF");
+  index = aux.find("BEGIN_");
+  if(index != std::string::npos)
+    aux.replace(index,6,"BEGIN");
   errors_found++;
-  fprintf(stderr,"Error in line %d: %s\n",line,str);
+  fprintf(stderr,"Error in line %d: %s\n",line,aux.c_str());
 }
