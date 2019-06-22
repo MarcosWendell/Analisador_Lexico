@@ -11,6 +11,7 @@ void yyerror(const char*);
 #define WORDFILE "codes.txt"
 
 int line = 1;
+int errors_found = 0;
 
 //tabela com as palavras reservadas e simbolos especiais
 table t;
@@ -66,7 +67,7 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 											string str = inTable(string(yytext),t);
 											if(str.size() == 0){
 												yyerror((string("lexical error, invalid carater '")+string(yytext)+"'").c_str());
-												return str.c_str()[0];
+												return CARACTER_INVALIDO;
 											}else{
 												return str.c_str()[0];
 											}
@@ -124,7 +125,19 @@ int main(){
 	initTable(&t);
 	//preenchendo tabela
 	fillTable(&t,string(WORDFILE));
-	yyparse();
+	line = 0;
+	errors_found = 0;
+	int success = yyparse();
+	switch(success){
+		case 0:
+		break;
+		case 1:
+		break;
+		case 2:
+		break;
+	}
+	printf("%d number of erros:%d\n", success,errors_found);
+	return 0;
 }
 
 int yywrap(){
