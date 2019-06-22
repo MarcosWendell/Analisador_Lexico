@@ -66,7 +66,7 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 {caracter_invalido} {
 											string str = inTable(string(yytext),t);
 											if(str.size() == 0){
-												yyerror((string("lexical error, invalid carater '")+string(yytext)+"'").c_str());
+												yyerror((string("lexical error, invalid character '")+string(yytext)+"'").c_str());
 												return CARACTER_INVALIDO;
 											}else{
 												return str.c_str()[0];
@@ -75,7 +75,7 @@ numero_real_mal_formado {numero_real}({caracter_invalido}|{letra})
 {ident_mal_formado} {
 											string str = inTable(string(&yytext[yyleng-1]),t);
 	 										if(str.size() == 0){
-												yyerror(string("lexical error, ill formed indetifier '"+string(yytext)+"'").c_str());
+												yyerror(string("lexical error, ill formed identifier '"+string(yytext)+"'").c_str());
 												return IDENT;
 											}else{
 												char aux = yytext[yyleng-1];
@@ -125,18 +125,17 @@ int main(){
 	initTable(&t);
 	//preenchendo tabela
 	fillTable(&t,string(WORDFILE));
-	line = 0;
+	line = 1;
 	errors_found = 0;
 	int success = yyparse();
 	switch(success){
 		case 0:
+			printf("No errors found;\n");
 		break;
 		case 1:
-		break;
-		case 2:
+			printf("\n%d error found;\n", errors_found);
 		break;
 	}
-	printf("%d number of erros:%d\n", success,errors_found);
 	return 0;
 }
 

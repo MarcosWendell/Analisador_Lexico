@@ -35,7 +35,6 @@ corpo: dc BEGIN_ comandos END
       | error BEGIN_ comandos END {yyerrok;}
       | dc BEGIN_ error END {yyerrok;}
       | dc BEGIN_ error {yyerrok;}
-      | error {yyerrok;}
       ;
 dc: dc_c dc_v dc_p
     ;
@@ -139,6 +138,7 @@ condicao: expressao relacao expressao
         | error relacao expressao {yyerrok;}
         | expressao error expressao {yyerrok;}
         | expressao relacao error {yyerrok;}
+        | error relacao error {yyerrok;}
         ;
 relacao: '=''='
         | '<''>'
