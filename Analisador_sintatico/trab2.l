@@ -129,7 +129,7 @@ int main(){
 	int success = yyparse();
 	switch(success){
 		case 0:
-			printf("No errors found;\n");
+			printf("\nNo errors found;\n");
 		break;
 		case 1:
 			printf("\n%d error found;\n", errors_found);
