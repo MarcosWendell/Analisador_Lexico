@@ -3,54 +3,54 @@
 #include <stdlib.h>
 #include <string>
 
+//declaracao do cabecalho das funcoes
 void yyerror(const char*);
 int yylex(void);
+//puxando variaveis globais do analisador lexico
 extern int errors_found;
+extern int line;
 %}
 
+//definindo opcao com mensagens de erro mais significativas
 %define parse.error verbose
 
-
+//definindo tipos que podem ser retornados em yyval
 %union {int inteiro;
         double real;
         char * str;
 }
 
+//tokens do gramatica
 %token PROGRAM BEGIN_ END CONST VAR REAL INTEGER PROCEDURE ELSE READ WHILE WRITE DO IF THEN FOR TO
 %token IDENT NUMERO_INTEIRO NUMERO_REAL CARACTER_INVALIDO
+//nao terminal inicial
 %start program
 
+//resolvendo problemas de ambiguidade da gramatica
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
+//regras da grmatica LALG
 %%
-program: PROGRAM IDENT ';' corpo '.'{if(errors_found != 0){
+program: PROGRAM IDENT ';' corpo '.'{ //verificando se houve erros
+                                      if(errors_found != 0){
+                                        //retornado que ha erros na sintaxe
                                         YYABORT;
                                       }
                                     }
-        /* | PROGRAM IDENT ';' error '.'{YYABORT;} */
-        /* | PROGRAM IDENT ';' error {YYABORT;} */
-        | error {YYABORT;}
+        | error {
+                  //retornando que ha erros na sintaxe
+                  YYABORT;
+                }
         ;
 corpo: dc BEGIN_ comandos END
-      /* | error BEGIN_ comandos END {yyerrok;} */
-      /* | dc BEGIN_ error END {yyerrok;} */
-      /* | dc BEGIN_ error {yyerrok;} */
       ;
 dc: dc_c dc_v dc_p
     ;
 dc_c: CONST IDENT '=' numero';'dc_c
-    /* | CONST IDENT '=' error';'dc_c {yyerrok;} */
-    /* | CONST IDENT '=' error {yyerrok;} */
-    /* | CONST IDENT '=' numero ';' error {yyerrok;} */
     | %empty
     ;
 dc_v: VAR variaveis ':' tipo_var ';' dc_v
-    /* | VAR error ':' tipo_var ';' dc_v {yyerrok;} */
-    /* | VAR error {yyerrok;} */
-    /* | VAR variaveis ':' error ';' dc_v {yyerrok;} */
-    /* | VAR variaveis ':' error {yyerrok;} */
-    /* | VAR variaveis ':' tipo_var ';' error {yyerrok;} */
     | %empty
     ;
 tipo_var: REAL
@@ -58,69 +58,47 @@ tipo_var: REAL
         | error
         ;
 variaveis: IDENT mais_var
-        /* | IDENT error {yyerrok;} */
         | error
         ;
 mais_var: ','variaveis
-        /* | ','error {yyerrok;} */
         | error
         | %empty
         ;
 dc_p: PROCEDURE IDENT parametros';'corpo_p dc_p
-    /* | PROCEDURE IDENT error';'corpo_p dc_p {yyerrok;} */
-    /* | PROCEDURE IDENT error {yyerrok;} */
     | error
     | %empty
     ;
 parametros: '('lista_par')'
-          /* | '('error')' {yyerrok;} */
-          /* | '('error {yyerrok;} */
           | error
           | %empty
           ;
 lista_par: variaveis ':' tipo_var mais_par
-          /* | error ':' tipo_var mais_par {yyerrok;} */
-          /* | variaveis ':' error mais_par {yyerrok;} */
-          /* | variaveis ':' tipo_var error {yyerrok;} */
           | error
           ;
 mais_par: ';'lista_par
-        /* | ';'error {yyerrok;} */
         | error
         | %empty
         ;
 corpo_p: dc_loc BEGIN_ comandos END';'
-        /* | error BEGIN_ comandos END';' {yyerrok;} */
-        /* | dc_loc BEGIN_ error END';' {yyerrok;} */
-        /* | dc_loc BEGIN_ error {yyerrok;} */
-        /* | error BEGIN_ error END';' {yyerrok;} */
         | error
         ;
 dc_loc: dc_v
         ;
 lista_arg: '('argumentos')'
-          /* | '('error')' {yyerrok;} */
-          /* | '('error {yyerrok;} */
           | error
           | %empty
           ;
 argumentos: IDENT mais_ident
           | error
-          /* | IDENT error {yyerrok;} */
           ;
 mais_ident: ';'argumentos
-          /* | ';'error */
           | error
           | %empty
           ;
 pfalsa: ELSE cmd
-      /* | ELSE error {yyerrok;} */
       | %empty %prec LOWER_THAN_ELSE
       ;
 comandos: cmd ';' comandos
-        /* | error ';' comandos {yyerrok;} */
-        /* | cmd ';' error {yyerrok;} */
-        /* | error ';' error {yyerrok;} */
         | error
         | %empty
         ;
@@ -132,27 +110,9 @@ cmd: READ'('variaveis')'
     | IDENT ':''=' expressao
     | IDENT lista_arg
     | BEGIN_ comandos END
-    /* | READ'('error')' {yyerrok;} */
-    /* | READ'('error {yyerrok;} */
-    /* | WRITE'('error')' {yyerrok;} */
-    /* | WRITE'('error {yyerrok;} */
-    /* | WHILE'('error')' DO cmd {yyerrok;} */
-    /* | WHILE'('error')' DO error {yyerrok;} */
-    /* | WHILE'('error {yyerrok;} */
-    /* | WHILE'('condicao')' DO error {yyerrok;} */
-    /* | IF error THEN cmd pfalsa {yyerrok;} */
-    /* | IF condicao THEN error pfalsa {yyerrok;} */
-    /* | IF error {yyerrok;} */
-    /* | IDENT ':''=' error */
-    /* | IDENT error */
-    /* | BEGIN_ error END {yyerrok;} */
     | error
     ;
 condicao: expressao relacao expressao
-        /* | error relacao expressao {yyerrok;} */
-        /* | expressao error expressao {yyerrok;} */
-        /* | expressao relacao error {yyerrok;} */
-        /* | error relacao error {yyerrok;} */
         ;
 relacao: '=''='
         | '<''>'
@@ -168,17 +128,14 @@ op_un: '+'
       | %empty
       ;
 outros_termos: op_ad termo outros_termos
-              /* | op_ad error outros_termos {yyerrok;} */
               | %empty
               ;
 op_ad: '+'
       | '-'
       ;
 termo: op_un fator mais_fatores
-      /* | error fator mais_fatores {yyerrok;} */
       ;
 mais_fatores: op_mul fator mais_fatores
-            /* | op_mul error mais_fatores */
             | error
             | %empty
             ;
@@ -189,25 +146,29 @@ op_mul: '*'
 fator: IDENT
       | numero
       | '('expressao')'
-      /* | '('error')' {yyerrok;} */
       ;
 numero: NUMERO_INTEIRO
       | NUMERO_REAL
       | error
       ;
 %%
-extern int line;
+// funcao que exibe as mensagens de erro
 void yyerror(const char *str){
   std::string aux = std::string(str);
 
+  //substituindo $end por uma mensagem mais significativa
   int index = aux.find("$end");
   if(index != std::string::npos)
     aux.replace(index,4,"EOF");
 
+  //substituindo BEGIN_ por uma mensagem mais significativa
   index = aux.find("BEGIN_");
   if(index != std::string::npos)
     aux.replace(index,6,"BEGIN");
 
+  //atualizando o numero de erros
   errors_found++;
+
+  //imprimindo mensagem de erro
   fprintf(stderr,"Error in line %d: %s\n",line,aux.c_str());
 }

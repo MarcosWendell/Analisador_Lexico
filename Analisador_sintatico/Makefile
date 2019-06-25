@@ -1,7 +1,7 @@
 all: gcc
 	rm *.yy.c *.tab.*
 yacc:
-	yacc -d trab2.y -t
+	yacc -d trab2.y
 lex:
 	lex trab2.l
 gcc: yacc lex
